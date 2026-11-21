@@ -1,0 +1,6 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+PracticalEcoBayes = "f1a5ddc0-e809-449c-a0bd-f95078420341"
+
+[compat]
+Documenter = "1"
