@@ -101,7 +101,7 @@ regression exactly, by Pólya–Gamma data augmentation:
 
     y[i] ~ Binomial(n[i], logistic(X[i, :]'β + offset[i])),   β ~ Normal(prior_mean, prior_sd)
 
-`data(c)` receives the [`ModelConditional`](@ref PracticalBayes.ModelConditional)
+`data(c)` receives PracticalBayes' `ModelConditional`
 and returns `(X, y)`, `(X, y, n)` or `(X, y, n, offset)` for the current state, so
 the rows can depend on other variables (for detection given occupancy, only the
 visits to occupied sites). `n` defaults to 1 (Bernoulli). The model's prior on
