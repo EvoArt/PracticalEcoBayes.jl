@@ -1,5 +1,9 @@
 # PracticalEcoBayes.jl
 
+[![CI](https://github.com/EvoArt/PracticalEcoBayes.jl/actions/workflows/CI.yml/badge.svg?branch=master)](https://github.com/EvoArt/PracticalEcoBayes.jl/actions/workflows/CI.yml?query=branch%3Amaster)
+[![Coverage](https://codecov.io/gh/EvoArt/PracticalEcoBayes.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/EvoArt/PracticalEcoBayes.jl)
+[![Docs](https://img.shields.io/badge/docs-dev-blue.svg)](https://EvoArt.github.io/PracticalEcoBayes.jl/dev/)
+
 Gibbs kernels for ecological models, for the `Gibbs` sampler of
 [PracticalBayes.jl](https://github.com/EvoArt/PracticalBayes.jl). Each kernel draws one
 block of a model from its exact full conditional, so discrete latent states and
