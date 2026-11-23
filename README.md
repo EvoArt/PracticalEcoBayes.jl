@@ -22,10 +22,15 @@ differentiable stand-in for the intractable likelihood; `grid_neighbours` and
 `distance_neighbours` build the graphs.
 
 ```julia
-using PracticalBayes, PracticalEcoBayes, Distributions
+using PracticalBayes, PracticalEcoBayes, Distributions, Random
 using LogExpFunctions: logistic
 
 # single-species occupancy: y is sites × visits (missing = no visit)
+rng = MersenneTwister(42)
+ztrue = rand(rng, Bernoulli(0.6), 12)
+y = Union{Missing,Int}[rand(rng, Bernoulli(ztrue[i] * 0.7)) for i in eachindex(ztrue), _ in 1:3]
+y[2, 3] = missing
+
 @model function occupancy(y)
     β ~ Normal(0, 2.5)                     # occupancy log-odds
     α ~ Normal(0, 2.5)                     # detection log-odds
@@ -47,7 +52,7 @@ spl = Gibbs(
         v = [(i, j) for (i, j) in visits if c.values.z[i]]   # visits to occupied sites
         (ones(length(v), 1), [y[i, j] for (i, j) in v])
     end)
-chn = sample(occupancy(y), spl, 2000)
+chn = sample(rng, occupancy(y), spl, 2000; progress=false)
 ```
 
 For multi-species occupancy with species interactions (Rota et al. 2016), see

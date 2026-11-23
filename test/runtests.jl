@@ -23,6 +23,24 @@ draws_of(chn, name) = vec(chn[name])
     end
 end
 
+@testset "README Julia examples" begin
+    readme = read(joinpath(@__DIR__, "..", "README.md"), String)
+    docs_home = read(joinpath(@__DIR__, "..", "docs", "src", "index.md"), String)
+    examples = [m.captures[1] for m in eachmatch(r"(?ms)^```julia\s*\n(.*?)^```\s*$", readme)]
+    docs_examples = [m.captures[1] for m in eachmatch(r"(?ms)^```julia\s*\n(.*?)^```\s*$", docs_home)]
+    @test !isempty(examples)
+    @test examples == docs_examples
+    mktempdir() do dir
+        for (i, code) in enumerate(examples)
+            path = joinpath(dir, "readme_example_$i.jl")
+            write(path, code)
+            example = Module(Symbol("ReadmeExample", i))
+            Base.include(example, path)
+            @test isdefined(example, :chn)
+        end
+    end
+end
+
 @testset "PolyaGammaLogit recovers logistic coefficients" begin
     rng = StableRNG(2)
     n = 800
