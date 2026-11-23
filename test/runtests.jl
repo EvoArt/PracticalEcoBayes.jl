@@ -35,8 +35,8 @@ end
             path = joinpath(dir, "readme_example_$i.jl")
             write(path, code)
             example = Module(Symbol("ReadmeExample", i))
-            Base.include(example, path)
-            @test isdefined(example, :chn)
+            chain = Base.include(example, path)
+            @test length(chain[:β]) == 2000
         end
     end
 end
