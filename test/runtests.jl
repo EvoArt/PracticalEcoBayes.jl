@@ -70,6 +70,30 @@ end
     @test std(getindex.(draws_of(chn, :β), 2)) ≈ se[2] rtol = 0.25
 end
 
+@testset "Pólya–Gamma helpers and argument forms" begin
+    @test PracticalEcoBayes._pg_a(0, 0.0) == 0.0              # the series vanishes at x ≤ 0
+    @test rand_polyagamma(2, 0.5) > 0                          # default RNG
+    @test_throws ArgumentError rand_polyagamma(-1, 0.5)
+    rng = StableRNG(11)
+    X = hcat(ones(30), randn(rng, 30))
+    y = rand(rng, 0:3, 30)
+    β = polyagamma_logit_draw(rng, X, y, zeros(2); n=fill(3, 30), offset=fill(0.2, 30),
+                              prior_mean=[0.0, 0.0], prior_sd=[2.0, 2.0])
+    @test length(β) == 2 && all(isfinite, β)
+    @test length(polyagamma_logit_draw(X, y .> 1, zeros(2))) == 2   # default RNG, Bernoulli
+    @test_throws DimensionMismatch polyagamma_logit_draw(rng, X, y, zeros(3))
+    @test_throws DimensionMismatch polyagamma_logit_draw(rng, X[1:5, :], y, zeros(2))
+    # data functions may return (X, y), (X, y, n) or (X, y, n, offset)
+    @test PracticalEcoBayes._unpack_logit((X, y)) == (X, y, 1, 0.0)
+    @test PracticalEcoBayes._unpack_logit((X, y, 3)) == (X, y, 3, 0.0)
+    @test PracticalEcoBayes._unpack_logit((X, y, 3, 0.5)) == (X, y, 3, 0.5)
+    # draws come back in the shape of the current value
+    @test PracticalEcoBayes._like(0.0, [1.5]) == 1.5
+    @test PracticalEcoBayes._like(zeros(2, 1), [1.0, 2.0]) == reshape([1.0, 2.0], 2, 1)
+    # the categorical draw falls back to the last index when the weights are NaN
+    @test PracticalEcoBayes._draw_index(StableRNG(1), [NaN, NaN]) == 2
+end
+
 @testset "OccupancyStates matches the exact conditional" begin
     rng = StableRNG(3)
     ψ, p = 0.6, 0.3
@@ -117,6 +141,7 @@ end
     @test sort(nb.adjacency[1]) == [2, 3]                     # (1,1): below and right
     @test length(grid_neighbours(3, 3; diagonal=true).adjacency[5]) == 8
     @test distance_neighbours([0 0; 1 0; 5 5]; radius=1.5).adjacency == [[2], [1], Int[]]
+    @test distance_neighbours([[0, 0], [1, 0], [5, 5]]; radius=1.5).adjacency == [[2], [1], Int[]]
     @test_throws ArgumentError Neighbours([[2], Int[]])     # not symmetric
     A = [0 2 0; 2 0 1; 0 1 0]
     @test Neighbours(A).weights[2] == [2.0, 1.0]
